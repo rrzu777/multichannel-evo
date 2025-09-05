@@ -1,0 +1,95 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: mc_postgres
+    environment:
+      POSTGRES_DB: chatwoot_production
+      POSTGRES_USER: chatwoot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chatwoot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  redis:
+    image: redis:7-alpine
+    container_name: mc_redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    networks:
+      - internal
+
+  chatwoot_rails:
+    image: chatwoot/chatwoot:latest
+    container_name: mc_chatwoot_rails
+    env_file:
+      - env/.chatwoot.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "3009:3000" # host:container
+    volumes:
+      - chatwoot_storage:/app/storage
+    networks:
+      - internal
+
+  chatwoot_worker:
+    image: chatwoot/chatwoot:latest
+    container_name: mc_chatwoot_worker
+    env_file:
+      - env/.chatwoot.env
+    command: ["bash", "-lc", "bundle exec sidekiq"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - internal
+
+  evolution-api:
+    # Set EVOLUTION_IMAGE in a .env file to override registry/tag
+    image: ${EVOLUTION_IMAGE:-evolutionapi/evolution-api:latest}
+    container_name: mc_evolution_api
+    env_file:
+      - env/.evolution.env
+    ports:
+      - "3001:8080" # host:container
+    volumes:
+      - evolution_data:/data
+    networks:
+      - internal
+
+  flowise:
+    image: flowiseai/flowise:latest
+    container_name: mc_flowise
+    env_file:
+      - env/.flowise.env
+    ports:
+      - "3002:3000" # host:container
+    volumes:
+      - flowise_data:/root/.flowise
+    networks:
+      - internal
+
+volumes:
+  pgdata:
+  redisdata:
+  chatwoot_storage:
+  evolution_data:
+  flowise_data:
+
+networks:
+  internal:
+    driver: bridge

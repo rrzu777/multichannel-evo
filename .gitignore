@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Local Compose env
+.env
+
+# Env files (local variants)
+env/*.env.local
+env/*.secrets
+
+# Logs and temp
+logs/
+tmp/
+
+# Node (if added later)
+node_modules/
+
