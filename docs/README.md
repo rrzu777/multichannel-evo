@@ -9,9 +9,9 @@ Quickstart
 - Prepare Chatwoot DB: `docker compose exec chatwoot_rails bundle exec rails db:chatwoot_prepare`
 
 Default Ports
-- Chatwoot: http://localhost:3009
+- Chatwoot: http://localhost:3000 (changed from 3009)
 - Evolution API: http://localhost:3001
-- Flowise: http://localhost:3002
+- Flowise: http://localhost:3012 (changed from 3002)
 
 Healthchecks
 - Postgres: service health must be healthy (compose HC).
@@ -20,8 +20,9 @@ Healthchecks
 - Flowise: UI loads and you can create a simple flow.
 
 Notes
-- Evolution API image: set a `.env` (compose) variable `EVOLUTION_IMAGE` to pick a registry. Examples:
-  - Docker Hub (default): `EVOLUTION_IMAGE=evolutionapi/evolution-api:latest`
-  - GHCR (requires public visibility or auth): `EVOLUTION_IMAGE=ghcr.io/evolution-api/evolution-api:latest`
-  - If GHCR denies access, run `docker login ghcr.io` with a PAT that has `read:packages` or switch to Docker Hub.
+- Registries explicit: Compose pins Docker Hub via `docker.io/...` to avoid mirror/misrouting issues.
+- Evolution API image: set `.env` `EVOLUTION_IMAGE` to choose source.
+  - GHCR (auth): `EVOLUTION_IMAGE=ghcr.io/evolutionapi/evolution-api:latest` (or a valid tag).
+  - Local build (no registry): use the `local-build` profile.
+- Postgres image includes pgvector: using `docker.io/pgvector/pgvector:pg14` to satisfy Chatwoot's `CREATE EXTENSION vector`.
 - For production, place services behind a proxy (Traefik/Nginx) with TLS and move storage to external services as needed.

@@ -2,16 +2,17 @@ version: "3.9"
 
 services:
   postgres:
-    image: postgres:14-alpine
+    # Use Postgres with pgvector extension for Chatwoot AI features
+    image: docker.io/pgvector/pgvector:pg14
     container_name: mc_postgres
     environment:
       POSTGRES_DB: chatwoot_production
       POSTGRES_USER: chatwoot
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: changeme
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U chatwoot"]
+      test: ["CMD-SHELL", "pg_isready -U chatwoot -h 127.0.0.1 -d chatwoot_production || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -19,7 +20,7 @@ services:
       - internal
 
   redis:
-    image: redis:7-alpine
+    image: docker.io/library/redis:7-alpine
     container_name: mc_redis
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
@@ -28,7 +29,7 @@ services:
       - internal
 
   chatwoot_rails:
-    image: chatwoot/chatwoot:latest
+    image: docker.io/chatwoot/chatwoot:latest
     container_name: mc_chatwoot_rails
     env_file:
       - env/.chatwoot.env
@@ -38,18 +39,21 @@ services:
       redis:
         condition: service_started
     ports:
-      - "3009:3000" # host:container
+      - "3000:3000" # host:container (changed from 3009)
     volumes:
       - chatwoot_storage:/app/storage
     networks:
-      - internal
+      internal:
+        aliases:
+          - chatwoot
+    command: ["sh", "-lc", "bundle exec rails s -p 3000 -b 0.0.0.0"]
 
   chatwoot_worker:
-    image: chatwoot/chatwoot:latest
+    image: docker.io/chatwoot/chatwoot:latest
     container_name: mc_chatwoot_worker
     env_file:
       - env/.chatwoot.env
-    command: ["bash", "-lc", "bundle exec sidekiq"]
+    command: ["sh", "-lc", "bundle exec sidekiq"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -71,13 +75,36 @@ services:
     networks:
       - internal
 
+  evolution-api-local:
+    # Build Evolution API from local source to avoid GHCR pulls
+    # 1) Clone the upstream repo into ./services/evolution-api
+    # 2) Run with profile: `docker compose --profile local-build up -d evolution-api-local`
+    build:
+      context: ./services/evolution-api
+      dockerfile: Dockerfile
+    container_name: mc_evolution_api_local
+    env_file:
+      - env/.evolution.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "3001:8080"
+    volumes:
+      - evolution_data:/data
+    networks:
+      - internal
+    profiles: ["local-build"]
+
   flowise:
-    image: flowiseai/flowise:latest
+    image: docker.io/flowiseai/flowise:latest
     container_name: mc_flowise
     env_file:
       - env/.flowise.env
     ports:
-      - "3002:3000" # host:container
+      - "3012:3000" # host:container (changed from 3002 to avoid conflict)
     volumes:
       - flowise_data:/root/.flowise
     networks:
