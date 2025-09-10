@@ -8,6 +8,7 @@
 # Env files (local variants)
 env/*.env.local
 env/*.secrets
+env/*.env
 
 # Logs and temp
 logs/
