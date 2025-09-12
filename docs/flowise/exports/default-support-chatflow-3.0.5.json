@@ -1,0 +1,74 @@
+{
+  "nodes": [
+    {
+      "id": "openAI_0",
+      "position": { "x": 480, "y": 320 },
+      "type": "customNode",
+      "data": {
+        "id": "openAI_0",
+        "label": "OpenAI",
+        "version": 4,
+        "name": "openAI",
+        "type": "OpenAI",
+        "baseClasses": ["OpenAI", "BaseLLM", "BaseLanguageModel", "Runnable"],
+        "category": "LLMs",
+        "description": "Wrapper around OpenAI large language models",
+        "inputParams": [
+          {"label": "Connect Credential", "name": "credential", "type": "credential", "credentialNames": ["openAIApi"], "id": "openAI_0-input-credential-credential", "display": true},
+          {"label": "Model Name", "name": "modelName", "type": "asyncOptions", "loadMethod": "listModels", "default": "gpt-3.5-turbo", "id": "openAI_0-input-modelName-asyncOptions", "display": true},
+          {"label": "Temperature", "name": "temperature", "type": "number", "step": 0.1, "default": 0.3, "optional": true, "id": "openAI_0-input-temperature-number", "display": true}
+        ],
+        "inputAnchors": [
+          {"label": "Cache", "name": "cache", "type": "BaseCache", "optional": true, "id": "openAI_0-input-cache-BaseCache", "display": true}
+        ],
+        "inputs": {"cache": "", "modelName": "gpt-3.5-turbo", "temperature": 0.3},
+        "outputAnchors": [
+          {"id": "openAI_0-output-openAI-OpenAI|BaseLLM|BaseLanguageModel|Runnable", "name": "openAI", "label": "OpenAI", "description": "Wrapper around OpenAI large language models", "type": "OpenAI | BaseLLM | BaseLanguageModel | Runnable"}
+        ],
+        "outputs": {},
+        "selected": false
+      },
+      "width": 300,
+      "height": 400,
+      "selected": false,
+      "dragging": false,
+      "positionAbsolute": {"x": 480, "y": 320}
+    },
+    {
+      "id": "conversationChain_0",
+      "position": { "x": 80, "y": 480 },
+      "type": "customNode",
+      "data": {
+        "id": "conversationChain_0",
+        "label": "Conversation Chain",
+        "version": 3,
+        "name": "conversationChain",
+        "type": "ConversationChain",
+        "baseClasses": ["ConversationChain", "LLMChain", "BaseChain", "Runnable"],
+        "category": "Chains",
+        "description": "Chat models specific conversational chain with memory",
+        "inputParams": [
+          {"label": "System Message", "name": "systemMessagePrompt", "type": "string", "rows": 6, "description": "If Chat Prompt Template is provided, this will be ignored", "additionalParams": true, "optional": true, "default": "Eres un asistente de soporte amigable y útil para una empresa.\n- Responde en español de forma breve y clara.\n- Si no sabes la respuesta, dilo y sugiere escalar con un humano.\n- Si el usuario pide ‘humano’ o sinónimos, no respondas contenido nuevo.", "placeholder": "Eres un asistente de soporte...", "id": "conversationChain_0-input-systemMessagePrompt-string", "display": true}
+        ],
+        "inputAnchors": [
+          {"label": "Chat Model", "name": "model", "type": "BaseChatModel", "id": "conversationChain_0-input-model-BaseChatModel", "display": true},
+          {"label": "Memory", "name": "memory", "type": "BaseMemory", "id": "conversationChain_0-input-memory-BaseMemory", "display": true},
+          {"label": "Chat Prompt Template", "name": "chatPromptTemplate", "type": "ChatPromptTemplate", "description": "Override existing prompt with Chat Prompt Template. Human Message must includes {input} variable", "optional": true, "id": "conversationChain_0-input-chatPromptTemplate-ChatPromptTemplate", "display": true}
+        ],
+        "inputs": {"model": "", "memory": "", "chatPromptTemplate": "", "systemMessagePrompt": "Eres un asistente de soporte amigable y útil para una empresa.\n- Responde en español de forma breve y clara.\n- Si no sabes la respuesta, dilo y sugiere escalar con un humano.\n- Si el usuario pide ‘humano’ o sinónimos, no respondas contenido nuevo."},
+        "outputAnchors": [
+          {"id": "conversationChain_0-output-conversationChain-ConversationChain|LLMChain|BaseChain|Runnable", "name": "conversationChain", "label": "ConversationChain", "description": "Chat models specific conversational chain with memory", "type": "ConversationChain | LLMChain | BaseChain | Runnable"}
+        ],
+        "outputs": {},
+        "selected": false
+      },
+      "width": 300,
+      "height": 438,
+      "selected": false,
+      "positionAbsolute": {"x": 80, "y": 480},
+      "dragging": false
+    }
+  ],
+  "edges": []
+}
+
