@@ -76,3 +76,24 @@ Importar Flujos (JSON)
 - Ejemplos listos: `docs/flowise/exports/default-support-bot.flow.json` y `docs/flowise/exports/rag-support-bot.flow.json`.
 - En Flowise UI: Chatflows → Import → selecciona el JSON.
 - O vía API (ajusta según tu versión): ver `scripts/flowise-import.sh`.
+
+---
+
+# Phase 4 — Telegram / Instagram / Facebook
+
+Goal
+- Add TG/IG/FB channels using native Chatwoot inboxes and reuse the same Agent Bot (webhook → Flowise).
+
+What’s included
+- Channel guides: `docs/channels/telegram.md`, `docs/channels/instagram.md`, `docs/channels/facebook.md`.
+- Checklist and validation: how to assign the existing Agent Bot and test DMs end-to-end.
+
+High-level Steps
+- Telegram: create a Bot with BotFather, grab the token, add a Telegram inbox in Chatwoot with that token, assign the Agent Bot.
+- Instagram: ensure Business account + Facebook App with Instagram Messaging enabled; connect via Chatwoot’s Instagram channel wizard; assign the Agent Bot.
+- Facebook Messenger: connect a Facebook Page via Chatwoot’s wizard; assign the Agent Bot.
+
+Healthchecks & Tests
+- DM from TG/IG/FB reaches Chatwoot inbox.
+- Bot replies via gateway → Flowise, human handoff keywords work.
+- See detailed steps and troubleshooting per channel guide.

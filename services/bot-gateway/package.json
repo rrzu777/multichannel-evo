@@ -1,0 +1,15 @@
+{
+  "name": "bot-gateway",
+  "version": "0.1.0",
+  "description": "Chatwoot Agent Bot webhook → Flowise → reply to Chatwoot",
+  "main": "src/index.js",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
+
