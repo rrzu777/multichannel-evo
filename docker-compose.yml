@@ -5,10 +5,8 @@ services:
     # Use Postgres with pgvector extension for Chatwoot AI features
     image: docker.io/pgvector/pgvector:pg14
     container_name: mc_postgres
-    environment:
-      POSTGRES_DB: chatwoot_production
-      POSTGRES_USER: chatwoot
-      POSTGRES_PASSWORD: changeme
+    env_file:
+    - ./env/.postgres.env
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -33,31 +31,26 @@ services:
     container_name: mc_chatwoot_rails
     env_file:
       - env/.chatwoot.env
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_started
     ports:
-      - "3000:3000" # host:container (changed from 3009)
+      - "3000:3000"
     volumes:
       - chatwoot_storage:/app/storage
     networks:
       internal:
-        aliases:
-          - chatwoot
-    command: ["sh", "-lc", "bundle exec rails s -p 3000 -b 0.0.0.0"]
+        aliases: [chatwoot]
+    # IMPORTANTE: pásale el comando que debe ejecutar rails.sh
+    command: ["bundle","exec","rails","s","-p","3000","-b","0.0.0.0"]
 
   chatwoot_worker:
     image: docker.io/chatwoot/chatwoot:latest
     container_name: mc_chatwoot_worker
     env_file:
       - env/.chatwoot.env
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    command: ["sh", "-lc", "bundle exec sidekiq"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -65,17 +58,28 @@ services:
         condition: service_started
     networks:
       - internal
+    # El worker ejecuta Sidekiq
+    command: ["bundle","exec","sidekiq"]
+
 
   evolution-api:
     # Set EVOLUTION_IMAGE in a .env file to override registry/tag
-    image: ${EVOLUTION_IMAGE:-evolutionapi/evolution-api:latest}
+    image: evoapicloud/evolution-api:latest
     container_name: mc_evolution_api
+    environment:
+      SERVER_TYPE: "http"
+      SERVER_PORT: "8080"
+      SERVER_URL: "http://multi-evoapi.ddnsfree.com:8080"
+      SERVER_SSL__ENABLED: "false"
+      LOG__LEVEL: "DEBUG"
+  
     env_file:
       - env/.evolution.env
     ports:
       - "3001:8080" # host:container
     volumes:
       - evolution_data:/data
+      - ./env/.evolution.env:/evolution/.env:ro
     networks:
       - internal
 
